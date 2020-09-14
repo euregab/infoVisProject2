@@ -24,7 +24,7 @@ var stocks,
 var line = d3.svg.line()
     .interpolate("basis")
     .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d.price); });
+    .y(function(d) { return y(d.delayvalue); });
 
 // A line generator, for the dark stroke.
 var axis = d3.svg.line()
@@ -36,9 +36,9 @@ var axis = d3.svg.line()
 var area = d3.svg.area()
     .interpolate("basis")
     .x(function(d) { return x(d.date); })
-    .y1(function(d) { return y(d.price); });
+    .y1(function(d) { return y(d.delayvalue); });
 
-d3.csv("stocks.csv", function(data) {
+d3.dsv("prova.csv", function(data) {
   var parse = d3.time.format("%b %Y").parse;
 
   // Nest stock values by symbol.
@@ -47,15 +47,15 @@ d3.csv("stocks.csv", function(data) {
       .entries(stocks = data);
 
   // Parse dates and numbers. We assume values are sorted by date.
-  // Also compute the maximum price per symbol, needed for the y-domain.
+  // Also compute the maximum delayvalue per symbol, needed for the y-domain.
   symbols.forEach(function(s) {
-    s.values.forEach(function(d) { d.date = parse(d.date); d.price = +d.price; });
-    s.maxPrice = d3.max(s.values, function(d) { return d.price; });
-    s.sumPrice = d3.sum(s.values, function(d) { return d.price; });
+    s.values.forEach(function(d) { d.date = parse(d.date); d.delayvalue = +d.delayvalue; });
+    s.maxDelay = d3.max(s.values, function(d) { return d.delayvalue; });
+    s.sumDelay = d3.sum(s.values, function(d) { return d.delayvalue; });
   });
 
-  // Sort by maximum price, descending.
-  symbols.sort(function(a, b) { return b.maxPrice - a.maxPrice; });
+  // Sort by maximum delayvalue, descending.
+  symbols.sort(function(a, b) { return b.maxDelay - a.maxDelay; });
 
   var g = svg.selectAll("g")
       .data(symbols)
@@ -99,14 +99,14 @@ function lines() {
   function draw(k) {
     g.each(function(d) {
       var e = d3.select(this);
-      y.domain([0, d.maxPrice]);
+      y.domain([0, d.maxDelay]);
 
       e.select("path")
           .attr("d", function(d) { return line(d.values.slice(0, k + 1)); });
 
       e.selectAll("circle, text")
           .data(function(d) { return [d.values[k], d.values[k]]; })
-          .attr("transform", function(d) { return "translate(" + x(d.date) + "," + y(d.price) + ")"; });
+          .attr("transform", function(d) { return "translate(" + x(d.date) + "," + y(d.delayvalue) + ")"; });
     });
   }
 
@@ -149,7 +149,7 @@ function horizons() {
       .attr("dy", "0em");
 
   g.each(function(d) {
-    y.domain([0, d.maxPrice]);
+    y.domain([0, d.maxDelay]);
 
     d3.select(this).selectAll(".area")
         .data(d3.range(3))
@@ -160,7 +160,7 @@ function horizons() {
         .style("fill", function(d, i) { return color(i); })
         .style("fill-opacity", 1e-6);
 
-    y.domain([0, d.maxPrice / 3]);
+    y.domain([0, d.maxDelay / 3]);
 
     d3.select(this).selectAll(".line").transition()
         .duration(duration)
@@ -187,7 +187,7 @@ function areas() {
       .attr("d", function(d) { return axis(d.values); });
 
   g.each(function(d) {
-    y.domain([0, d.maxPrice]);
+    y.domain([0, d.maxDelay]);
 
     d3.select(this).select(".line").transition()
         .duration(duration)
@@ -225,14 +225,14 @@ function stackedArea() {
   var stack = d3.layout.stack()
       .values(function(d) { return d.values; })
       .x(function(d) { return d.date; })
-      .y(function(d) { return d.price; })
+      .y(function(d) { return d.delayvalue; })
       .out(function(d, y0, y) { d.price0 = y0; })
       .order("reverse");
 
   stack(symbols);
 
   y
-      .domain([0, d3.max(symbols[0].values.map(function(d) { return d.price + d.price0; }))])
+      .domain([0, d3.max(symbols[0].values.map(function(d) { return d.delayvalue + d.price0; }))])
       .range([h, 0]);
 
   line
@@ -240,7 +240,7 @@ function stackedArea() {
 
   area
       .y0(function(d) { return y(d.price0); })
-      .y1(function(d) { return y(d.price0 + d.price); });
+      .y1(function(d) { return y(d.price0 + d.delayvalue); });
 
   var t = svg.selectAll(".symbol").transition()
       .duration(duration)
@@ -255,7 +255,7 @@ function stackedArea() {
       .attr("d", function(d) { return line(d.values); });
 
   t.select("text")
-      .attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.price / 2 + d.price0) + ")"; });
+      .attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.delayvalue / 2 + d.price0) + ")"; });
 
   setTimeout(streamgraph, duration + delay);
 }
@@ -264,7 +264,7 @@ function streamgraph() {
   var stack = d3.layout.stack()
       .values(function(d) { return d.values; })
       .x(function(d) { return d.date; })
-      .y(function(d) { return d.price; })
+      .y(function(d) { return d.delayvalue; })
       .out(function(d, y0, y) { d.price0 = y0; })
       .order("reverse")
       .offset("wiggle");
@@ -285,7 +285,7 @@ function streamgraph() {
       .attr("d", function(d) { return line(d.values); });
 
   t.select("text")
-      .attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.price / 2 + d.price0) + ")"; });
+      .attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.delayvalue / 2 + d.price0) + ")"; });
 
   setTimeout(overlappingArea, duration + delay);
 }
@@ -294,21 +294,21 @@ function overlappingArea() {
   var g = svg.selectAll(".symbol");
 
   line
-      .y(function(d) { return y(d.price0 + d.price); });
+      .y(function(d) { return y(d.price0 + d.delayvalue); });
 
   g.select(".line")
       .attr("d", function(d) { return line(d.values); });
 
   y
-      .domain([0, d3.max(symbols.map(function(d) { return d.maxPrice; }))])
+      .domain([0, d3.max(symbols.map(function(d) { return d.maxDelay; }))])
       .range([h, 0]);
 
   area
       .y0(h)
-      .y1(function(d) { return y(d.price); });
+      .y1(function(d) { return y(d.delayvalue); });
 
   line
-      .y(function(d) { return y(d.price); });
+      .y(function(d) { return y(d.delayvalue); });
 
   var t = g.transition()
       .duration(duration);
@@ -323,7 +323,7 @@ function overlappingArea() {
 
   t.select("text")
       .attr("dy", ".31em")
-      .attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.price) + ")"; });
+      .attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.delayvalue) + ")"; });
 
   svg.append("line")
       .attr("class", "line")
@@ -366,9 +366,9 @@ function groupedBar() {
         .data(function(d) { return d.values; })
       .enter().append("rect")
         .attr("x", function(d) { return x(d.date) + x1(p.key); })
-        .attr("y", function(d) { return y(d.price); })
+        .attr("y", function(d) { return y(d.delayvalue); })
         .attr("width", x1.rangeBand())
-        .attr("height", function(d) { return h - y(d.price); })
+        .attr("height", function(d) { return h - y(d.delayvalue); })
         .style("fill", color(p.key))
         .style("fill-opacity", 1e-6)
       .transition()
@@ -385,7 +385,7 @@ function stackedBar() {
   var stack = d3.layout.stack()
       .values(function(d) { return d.values; })
       .x(function(d) { return d.date; })
-      .y(function(d) { return d.price; })
+      .y(function(d) { return d.delayvalue; })
       .out(function(d, y0, y) { d.price0 = y0; })
       .order("reverse");
 
@@ -394,7 +394,7 @@ function stackedBar() {
   stack(symbols);
 
   y
-      .domain([0, d3.max(symbols[0].values.map(function(d) { return d.price + d.price0; }))])
+      .domain([0, d3.max(symbols[0].values.map(function(d) { return d.delayvalue + d.price0; }))])
       .range([h, 0]);
 
   var t = g.transition()
@@ -402,12 +402,12 @@ function stackedBar() {
 
   t.select("text")
       .delay(symbols[0].values.length * 10)
-      .attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.price / 2 + d.price0) + ")"; });
+      .attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.delayvalue / 2 + d.price0) + ")"; });
 
   t.selectAll("rect")
       .delay(function(d, i) { return i * 10; })
-      .attr("y", function(d) { return y(d.price0 + d.price); })
-      .attr("height", function(d) { return h - y(d.price); })
+      .attr("y", function(d) { return y(d.price0 + d.delayvalue); })
+      .attr("height", function(d) { return h - y(d.delayvalue); })
       .each("end", function() {
         d3.select(this)
             .style("stroke", "#fff")
@@ -428,11 +428,11 @@ function transposeBar() {
       .rangeRoundBands([0, w], .2);
 
   y
-      .domain([0, d3.max(symbols.map(function(d) { return d3.sum(d.values.map(function(d) { return d.price; })); }))]);
+      .domain([0, d3.max(symbols.map(function(d) { return d3.sum(d.values.map(function(d) { return d.delayvalue; })); }))]);
 
   var stack = d3.layout.stack()
       .x(function(d, i) { return i; })
-      .y(function(d) { return d.price; })
+      .y(function(d) { return d.delayvalue; })
       .out(function(d, y0, y) { d.price0 = y0; });
 
   stack(d3.zip.apply(null, symbols.map(function(d) { return d.values; }))); // transpose!
@@ -444,8 +444,8 @@ function transposeBar() {
 
   t.selectAll("rect")
       .delay(function(d, i) { return i * 10; })
-      .attr("y", function(d) { return y(d.price0 + d.price) - 1; })
-      .attr("height", function(d) { return h - y(d.price) + 1; })
+      .attr("y", function(d) { return y(d.price0 + d.delayvalue) - 1; })
+      .attr("height", function(d) { return h - y(d.delayvalue) + 1; })
       .attr("x", function(d) { return x(d.symbol); })
       .attr("width", x.rangeBand())
       .style("stroke-opacity", 1e-6);
@@ -469,7 +469,7 @@ function donut() {
   g.selectAll("rect").remove();
 
   var pie = d3.layout.pie()
-      .value(function(d) { return d.sumPrice; });
+      .value(function(d) { return d.sumDelay; });
 
   var arc = d3.svg.arc();
 
@@ -494,7 +494,7 @@ function donut() {
     var path = d3.select(this),
         text = d3.select(this.parentNode.appendChild(this.previousSibling)),
         x0 = x(d.data.key),
-        y0 = h - y(d.data.sumPrice);
+        y0 = h - y(d.data.sumDelay);
 
     return function(t) {
       var r = h / 2 / Math.min(1, t + 1e-3),
