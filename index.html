@@ -60,7 +60,7 @@ d3.csv("prova.csv", function(data) {
 
   // Nest stock values by symbol.
   symbols = d3.nest()
-      .key(function(d) { return d.symbol; })
+      .key(function(d) { return d.delay; })
       .entries(stocks = data);
 
   // Parse dates and numbers. We assume values are sorted by date.
