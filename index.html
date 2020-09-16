@@ -29,6 +29,7 @@ var x,
 var color = d3.scale.category10();
 
 var svg = d3.select("body").append("svg")
+.attr("id","svg")
     .attr("width", w + m[1] + m[3])
     .attr("height", h + m[0] + m[2])
   .append("g")
@@ -82,6 +83,12 @@ d3.csv("../bigfile.csv", function(data) {
   setTimeout(lines, duration);//parto a disegnare
 });
 
+
+function cambialclick(nome,duration,delay){
+  
+ setTimeout(nome,duration+delay)
+};
+
 function lines() {
   x = d3.time.scale().range([0, w - 60]);
   y = d3.scale.linear().range([h / 5 - 20, 0]);
@@ -133,16 +140,17 @@ function lines() {
     draw(k);
     if ((k += 2) >= n - 1) {
       draw(n-1);
-      setTimeout(horizons, 2000 );// faccio durare di piu quello prima
+     
       duration = 1;
       delay = 1;
       return true;
     }
   });
+  d3.select("#svg").on("click",function(d,i){cambialclick(horizons,duration,delay)});
 }
 
 function horizons() {
-  
+ 
   svg.selectAll("#pippo").attr("opacity",0);
 
 
@@ -324,7 +332,7 @@ function streamgraph() {
       .attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.delayValue / 2 + d.delay0) + ")"; });
       
     
-  setTimeout(overlappingArea, duration + delay);
+     setTimeout(overlappingArea,duration+delay);
 }
 
 function overlappingArea() {
@@ -376,9 +384,9 @@ function overlappingArea() {
       .style("stroke-opacity", 1);
 
 
-      duration = 3000;
-      delay = 200;
-  setTimeout(groupedBar, duration + delay);
+      duration = 300;
+      delay = 500;
+      d3.select("#svg").on("click",function(d,i){cambialclick(groupedBar,1,1)});
 }
 
 function groupedBar() {
@@ -418,7 +426,7 @@ function groupedBar() {
         .style("fill-opacity", 1);
   });
 
-  setTimeout(stackedBar, duration + delay);
+  d3.select("#svg").on("click",function(d,i){cambialclick(stackedBar,1,1)});
 }
 
 function stackedBar() {
@@ -461,7 +469,7 @@ function stackedBar() {
             .style("stroke-opacity", 1);
       });
 
-  setTimeout(transposeBar, duration + symbols[0].values.length * 10 + delay);
+      d3.select("#svg").on("click",function(d,i){cambialclick(transposeBar,duration  ,delay)});
 }
 
 function transposeBar() {
@@ -502,7 +510,7 @@ function transposeBar() {
       .duration(duration)
       .attr("x2", w);
 
-  setTimeout(donut,  duration / 2 + symbols[0].values.length * 10 + delay);
+      d3.select("#svg").on("click",function(d,i){cambialclick(donut,duration ,delay)});
 }
 
 function donut() {
@@ -519,7 +527,7 @@ function donut() {
       .style("fill", function(d) { return color(d.key); })
       .data(function() { return pie(symbols); })
     .transition()
-      .duration(duration)
+      .duration(duration+1000)
       .tween("arc", arcTween);
 
   g.select("text").transition()
@@ -556,7 +564,7 @@ function donut() {
     };
   }
 
-  setTimeout(donutExplode, duration + delay);
+  d3.select("#svg").on("click",function(d,i){cambialclick(donutExplode,duration ,delay)});
 }
 
 function donutExplode() {
@@ -573,7 +581,7 @@ function donutExplode() {
     d.innerRadius = r0a;
     d.outerRadius = r1a;
     d3.select(this).transition()
-        .duration(duration / 2)
+        .duration(duration +1000)
         .tween("arc", tweenArc({
           innerRadius: r0b,
           outerRadius: r1b
@@ -598,7 +606,7 @@ function donutExplode() {
     svg.selectAll("*").remove();
     svg.selectAll("g").data(symbols).enter().append("g").attr("class", "delay");
     lines();
-  }, duration);
+  }, duration+1000);
 }
 
 </script>
