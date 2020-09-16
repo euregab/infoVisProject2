@@ -108,6 +108,7 @@ function lines() {
         .style("stroke-width", "2px");
 
     e.append("text")
+    .attr("id","pippo")
         .attr("x", 12)
         .attr("dy", ".31em")
         .text(d.key);
@@ -132,13 +133,19 @@ function lines() {
     draw(k);
     if ((k += 2) >= n - 1) {
       draw(n-1);
-      setTimeout(horizons, 500);
+      setTimeout(horizons, 2000 );// faccio durare di piu quello prima
+      duration = 1;
+      delay = 1;
       return true;
     }
   });
 }
 
 function horizons() {
+  
+  svg.selectAll("#pippo").attr("opacity",0);
+
+
   svg.insert("defs", ".delay")
     .append("clipPath")
       .attr("id", "clip")
@@ -191,7 +198,7 @@ function horizons() {
         .each("end", function() { d3.select(this).style("fill-opacity", 0); });
   });
 
-  setTimeout(areas, duration + delay);
+  setTimeout(areas,delay);
 }
 
 function areas() {
@@ -220,7 +227,7 @@ function areas() {
     d3.select(this).select(".line").transition()
         .duration(duration)
         .style("stroke-opacity", 0)
-        .each("end", function() { d3.select(this).style("stroke-opacity", null); });
+        .each("end", function() { d3.select(this).style("stroke-opacity", 0); });
 
     d3.select(this).selectAll(".area")
         .filter(function(d, i) { return i; })
@@ -279,16 +286,17 @@ function stackedArea() {
       .attr("d", function(d) { return area(d.values); });
 
   t.select("path.line")
-      .style("stroke-opacity", function(d, i) { return i < 3 ? 1e-6 : 1; })
+      .style("stroke-opacity", 0)
       .attr("d", function(d) { return line(d.values); });
 
   t.select("text")
       .attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.delayValue / 2 + d.delay0) + ")"; });
-
+      
   setTimeout(streamgraph, duration + delay);
 }
 
 function streamgraph() {
+ 
   var stack = d3.layout.stack()
       .values(function(d) { return d.values; })
       .x(function(d) { return d.date; })
@@ -309,16 +317,19 @@ function streamgraph() {
       .attr("d", function(d) { return area(d.values); });
 
   t.select("path.line")
-      .style("stroke-opacity", 1e-6)
+      .style("stroke-opacity", 0)
       .attr("d", function(d) { return line(d.values); });
 
   t.select("text")
       .attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.delayValue / 2 + d.delay0) + ")"; });
-
+      
+    
   setTimeout(overlappingArea, duration + delay);
 }
 
 function overlappingArea() {
+  d3.selectAll("text").style("opacity", 1);
+
   var g = svg.selectAll(".delay");
 
   line
@@ -364,6 +375,9 @@ function overlappingArea() {
       .duration(duration)
       .style("stroke-opacity", 1);
 
+
+      duration = 3000;
+      delay = 200;
   setTimeout(groupedBar, duration + delay);
 }
 
