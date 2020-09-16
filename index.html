@@ -79,12 +79,12 @@ d3.csv("../bigfile.csv", function(data) {
     .enter().append("g")
       .attr("class", "delay");
 
-  setTimeout(lines, duration);
+  setTimeout(lines, duration);//parto a disegnare
 });
 
 function lines() {
   x = d3.time.scale().range([0, w - 60]);
-  y = d3.scale.linear().range([h / 4 - 20, 0]);
+  y = d3.scale.linear().range([h / 5 - 20, 0]);
 
   // Compute the minimum and maximum date across symbols.
   x.domain([
@@ -93,7 +93,7 @@ function lines() {
   ]);
 
   var g = svg.selectAll(".delay")
-      .attr("transform", function(d, i) { return "translate(0," + (i * h / 4 + 10) + ")"; });
+      .attr("transform", function(d, i) { return "translate(0," + (i * h / 5 + 10) + ")"; });
 
   g.each(function(d) {
     var e = d3.select(this);
@@ -131,7 +131,7 @@ function lines() {
   d3.timer(function() {
     draw(k);
     if ((k += 2) >= n - 1) {
-      draw(n - 1);
+      draw(n-1);
       setTimeout(horizons, 500);
       return true;
     }
@@ -144,7 +144,7 @@ function horizons() {
       .attr("id", "clip")
     .append("rect")
       .attr("width", w)
-      .attr("height", h / 4 - 20);
+      .attr("height", h / 5 - 20);
 
   var color = d3.scale.ordinal()
       .range(["#c6dbef", "#9ecae1", "#6baed6"]);
@@ -153,16 +153,16 @@ function horizons() {
       .attr("clip-path", "url(#clip)");
 
   area
-      .y0(h / 4 - 20);
+      .y0(h / 5 - 20);
 
   g.select("circle").transition()
       .duration(duration)
-      .attr("transform", function(d) { return "translate(" + (w - 60) + "," + (-h / 4) + ")"; })
+      .attr("transform", function(d) { return "translate(" + (w - 60) + "," + (-h / 5) + ")"; })
       .remove();
 
   g.select("text").transition()
       .duration(duration)
-      .attr("transform", function(d) { return "translate(" + (w - 60) + "," + (h / 4 - 20) + ")"; })
+      .attr("transform", function(d) { return "translate(" + (w - 60) + "," + (h / 5 - 20) + ")"; })
       .attr("dy", "0em");
 
   g.each(function(d) {
@@ -172,23 +172,23 @@ function horizons() {
         .data(d3.range(3))
       .enter().insert("path", ".line")
         .attr("class", "area")
-        .attr("transform", function(d) { return "translate(0," + (d * (h / 4 - 20)) + ")"; })
+        .attr("transform", function(d) { return "translate(0," + (d * (h / 5 - 20)) + ")"; })
         .attr("d", area(d.values))
         .style("fill", function(d, i) { return color(i); })
-        .style("fill-opacity", 1e-6);
+        .style("fill-opacity", 0);
 
     y.domain([0, d.maxPrice / 3]);
 
     d3.select(this).selectAll(".line").transition()
         .duration(duration)
         .attr("d", line(d.values))
-        .style("stroke-opacity", 1e-6);
+        .style("stroke-opacity", 0);
 
     d3.select(this).selectAll(".area").transition()
         .duration(duration)
-        .style("fill-opacity", 1)
+        .style("fill-opacity", 0)
         .attr("d", area(d.values))
-        .each("end", function() { d3.select(this).style("fill-opacity", null); });
+        .each("end", function() { d3.select(this).style("fill-opacity", 0); });
   });
 
   setTimeout(areas, duration + delay);
@@ -198,7 +198,18 @@ function areas() {
   var g = svg.selectAll(".delay");
 
   axis
-      .y(h / 4 - 21);
+      .y(h / 5 - 21);
+
+
+      g.select("circle").transition()
+      .duration(duration)
+      .attr("transform", function(d) { return "translate(" + (w - 60) + "," + (-h / 5) + ")"; })
+      .remove();
+
+      g.select("text").transition()
+      .duration(duration)
+      .attr("transform", function(d) { return "translate(" + (w - 60) + "," + (h / 5 - 20) + ")"; })
+      .attr("dy", "0em");
 
   g.select(".line")
       .attr("d", function(d) { return axis(d.values); });
@@ -208,14 +219,14 @@ function areas() {
 
     d3.select(this).select(".line").transition()
         .duration(duration)
-        .style("stroke-opacity", 1)
+        .style("stroke-opacity", 0)
         .each("end", function() { d3.select(this).style("stroke-opacity", null); });
 
     d3.select(this).selectAll(".area")
         .filter(function(d, i) { return i; })
       .transition()
         .duration(duration)
-        .style("fill-opacity", 1e-6)
+        .style("fill-opacity", 0)
         .attr("d", area(d.values))
         .remove();
 
