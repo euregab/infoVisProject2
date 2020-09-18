@@ -109,6 +109,32 @@ function cambialclick(nome,duration,delay){
  setTimeout(nome,duration+delay)
 };
 
+function distantiate(array){
+    let minDist = 15;
+    let len = array.length;
+
+    for (let i = 0; i < len - 1; i ++){
+        let j = i + 1;
+        let first = array[i];
+        let second = array[i + 1];
+        let distance = second - first;
+        let gap = minDist - distance;
+        if (distance < minDist){
+            if (i == 0){
+                second += gap;
+                array[j] = second;
+            }
+            else {
+                first -= gap / 2;
+                second += gap / 2;
+                array[i] = first;
+                array[j] = second;
+            }
+        }
+    }
+
+}
+
 var contatore = 0;
 
 
@@ -362,10 +388,18 @@ function stackedArea() {
       .style("stroke-opacity", 1)
       .attr("d", function(d) { return line(d.values); });
 
+  var labelHeights = symbols
+      .map(function(d){return d.values[d.values.length - 1];})
+      .map(function(d){return y(d.delayValue / 2 + d.delay0);});
+
+  distantiate(labelHeights);
+
   t.select("text")
-      .attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.delayValue / 2 + d.delay0) + ")"; });
-      
-      d3.select("#svg").on("click",function(d,i){cambialclick(streamgraph,duration,delay)});
+      //.attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.delayValue / 2 + d.delay0) + ")"; });
+      .attr("transform", function(d, i) { return "translate(" + (w - 60) + "," + labelHeights[i] + ")"; });
+
+
+    d3.select("#svg").on("click",function(d,i){cambialclick(streamgraph,duration,delay)});
 
 }
 
@@ -394,11 +428,19 @@ function streamgraph() {
       .style("stroke-opacity", 0)
       .attr("d", function(d) { return line(d.values); });
 
+    var labelHeights = symbols
+        .map(function(d){return d.values[d.values.length - 1];})
+        .map(function(d){return y(d.delayValue / 2 + d.delay0);});
+
+    distantiate(labelHeights);
+
   t.select("text")
-      .attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.delayValue / 2 + d.delay0) + ")"; });
-      
-    
-      d3.select("#svg").on("click",function(d,i){cambialclick(overlappingArea,1,1)});
+      //.attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.delayValue / 2 + d.delay0) + ")"; });
+      .attr("transform", function(d, i) { return "translate(" + (w - 60) + "," + labelHeights[i] + ")"; });
+
+
+
+    d3.select("#svg").on("click",function(d,i){cambialclick(overlappingArea,1,1)});
 }
 
 function overlappingArea() {
@@ -524,9 +566,17 @@ function stackedBar() {
   var t = g.transition()
       .duration(duration / 2);
 
+    var labelHeights = symbols
+        .map(function(d){return d.values[d.values.length - 1];})
+        .map(function(d){return y(d.delayValue / 2 + d.delay0);});
+
+    distantiate(labelHeights);
+
   t.select("text")
       .delay(symbols[0].values.length * 10)
-      .attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.delayValue / 2 + d.delay0) + ")"; });
+      //.attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.delayValue / 2 + d.delay0) + ")"; });
+      .attr("transform", function(d, i) { return "translate(" + (w - 60) + "," + labelHeights[i] + ")"; });
+
 
   t.selectAll("rect")
       .delay(function(d, i) { return i * 10; })
