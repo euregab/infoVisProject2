@@ -14,7 +14,14 @@ svg {
 
 </style>
 <body>
+
+
+
+  
 <script src="//d3js.org/d3.v3.min.js"></script>
+<script src="//d3plus.org/js/d3plus.js"></script>
+
+
 <script>
 
 var m = [80, 80, 100, 80],
@@ -29,7 +36,7 @@ var x,
 var color = d3.scale.category10();
 var arrayTitoli = ["Line Graph","Stacked Graph","Stream Graph","Overlapping Areas","Grouped Bars","Stacked Bars","Bars","Donut"];
 
-var Testi = ["Line Graph: disegna l'andamento dei ritardi in 5 grafici, uno per tipo di ritardo. Mappa nello spazio quindi un dato temporale  ed è di facile visualizzazione.","Stacked Graph: consente di osservare sulla stessa figura l'evoluzione del totale dei valori numerici e l'importanza relativa di ogni gruppo","tutto","bene","GroupedBars: consente di confrontare, per ogni mese, ogni tipo di ritardo con gli altri","StackedBars: efficace per mostrare la somma dei 5 tipi di ritardo per ogni mese, rappresentati da barre colorate sovrapposte","come","stai"]
+var rectWrap = ["Line Graph: disegna l'andamento dei ritardi in 5 grafici, uno per tipo di ritardo. Mappa nello spazio quindi un dato temporale  ed è di facile visualizzazione.","Stacked Graph: consente di osservare sulla stessa figura l'evoluzione del totale dei valori numerici e l'importanza relativa di ogni gruppo. Non sovrappone gli andamenti, ma li visualizza in succesione.","Stream Graph: una versione dello Stacked Area in cui le aree sono disposte lungo un asse orizzontale centrale. Questa differenza dà un effetto simile ad un flusso.","Overlapping Areas: Tipo di visualizzazione che fà sovrapporre l'andamento dei tipi di ritardo, accavallandoli e non facendoli visualizzare in successione come nello Stacked Graph.","GroupedBars: consente di confrontare, per ogni mese, ogni tipo di ritardo con gli altri.","StackedBars: efficace per mostrare la somma dei 5 tipi di ritardo per ogni mese, rappresentati da barre colorate poste una sopra l'altra.","   Bar Chart: questo grafico consente di fare paragoni su categorie discrete, rappresentate ognuna da una barra, la cui altezza simboleggia un valore numerico relativo a quella categoria.Qui l' asse delle ascisse è rappresentato dalla somma delle medie totali di ogni ritardo di ogni mese.   ","Donut :Il grafico Donut (noto anche come grafico a ciambella) è una variante di un grafico a torta tranne che ha un foro rotondo al centro che lo fa sembrare una ciambella, da cui il nome. Questo spazio vuoto può essere utilizzato per visualizzare dati aggiuntivi.Anche qui vengono visualizzate le somme delle medie totali dei ritardi di ogni mese."]
 
 
 var svg = d3.select("body").append("svg")
@@ -142,23 +149,27 @@ function titolo(intero){
 
  if(contatore < arrayTitoli.length){
 d3.selectAll("#title").text(arrayTitoli[contatore]);
-d3.selectAll("#testi").text(Testi[contatore]);
+d3.selectAll("#rectWrap").text(rectWrap[contatore]);
+d3plus.textwrap()
+    .container(d3.select("#rectWrap"))
+    .draw();
 contatore +=1;
 }else{
   contatore = 0;
 }
 };
 
- 
 
 svg.append("text").attr("id","title").attr("text-anchor","middle").style("font-size","38").attr("transform","translate("+((w/2))+",-20)");
-svg_1.append("text").attr("id","testi").attr("width",1060).attr("height",1060).style("font-size","20").attr("transform","translate(0,-60)");
+
+
+svg_1.append("rect").attr("class","shape").attr("id","riquadro").attr("height",200).attr("width",900).attr("y",-80).attr("x",0).attr("opacity",0.0);
+svg_1.append("text").attr("id","rectWrap").attr("class","wrap").attr("y",-80).attr("x",0).style("font-size","23");
+
+
+
 function lines() {
-
-  
-
-
-
+d3.select("#riquadro").attr("opacity",0.1);
 titolo(contatore);
 
   var maxRitardo = symbols[0].maxPrice;
@@ -711,7 +722,8 @@ function donut() {
 
 function donutExplode() {
   d3.selectAll("#title").remove();
-  d3.selectAll("#testi").remove();
+  d3.selectAll("#rectWrap").remove();
+  d3.select("#riquadro").remove();
  
   var r0a = h / 2 - x.rangeBand() / 2,
       r1a = h / 2,
@@ -753,7 +765,9 @@ function donutExplode() {
     contatore =0;
     svg.selectAll("g").data(symbols).enter().append("g").attr("class", "delay");
     svg.append("text").attr("id","title").attr("text-anchor","middle").style("font-size","38").attr("transform","translate("+((w/2))+",-20)");
-    svg_1.append("text").attr("id","testi").style("font-size","20").attr("transform","translate(0,-60)");
+    
+    svg_1.append("rect").attr("class","shape").attr("id","riquadro").attr("height",200).attr("width",900).attr("y",-80).attr("x",0).attr("opacity",0.0);
+    svg_1.append("text").attr("id","rectWrap").attr("class","wrap").attr("y",-80).attr("x",0).style("font-size","23");
     lines();
   }, duration+1000);
 }
