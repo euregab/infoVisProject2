@@ -30,7 +30,7 @@ var m = [80, 80, 100, 80],
 
 var x,
     y,
-    duration = 3000,
+    duration = 1500,
     delay = 500;
 
 var color = d3.scale.category10();
@@ -107,7 +107,9 @@ d3.csv("../bigfile.csv", function(data) {
     .enter().append("g")
       .attr("class", "delay");
 
-  setTimeout(lines, duration);//parto a disegnare
+      alert("cambiare grafico con un click del mouse, ma attendere il completamento dell' animazione prima di ricliccare, altrimenti ricaricare la pagina.");
+
+  setTimeout( lines, duration);//parto a disegnare
 });
 //-----------------------------------------------------FUNZIONI SUPPORTO------------------------------------------------------------------
 
@@ -224,7 +226,7 @@ titolo(contatore);
           .attr("d", function(d) { return line(d.values.slice(0, k + 1)); });
 
       e.selectAll("circle, text")
-          .data(function(d) { return [d.values[k], d.values[k]]; })
+          .data(function(d) { return [d.values[k], d.values[k]]; }).transition().duration(1000)
           .attr("transform", function(d) { return "translate(" + x(d.date) + "," + y(d.delayValue) + ")"; });
     });
   }
