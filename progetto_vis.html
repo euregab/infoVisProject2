@@ -57,22 +57,22 @@ var svg = d3.select("body").append("svg")
 
 
 var stocks,
-    symbols,
+    airDelay,
     years;
 
-// A line generator, for the dark stroke.
+//  line generator.
 var line = d3.svg.line()
     .interpolate("basis")
     .x(function(d) { return x(d.date); })
     .y(function(d) { return y(d.delayValue); });
 
-// A line generator, for the dark stroke.
+//  line generator.
 var axis = d3.svg.line()
     .interpolate("basis")
     .x(function(d) { return x(d.date); })
     .y(h);
 
-// A area generator, for the dark stroke.
+// area generator.
 var area = d3.svg.area()
     .interpolate("basis")
     .x(function(d) { return x(d.date); })
@@ -82,32 +82,32 @@ d3.csv("../bigfile.csv", function(data) {
   var parse = d3.time.format("%Y %m").parse;
 
   // Nest stock values by delay.
-  symbols = d3.nest()
+  airDelay = d3.nest()
       .key(function(d) { return d.delay; })
       .entries(stocks = data);
 
   // Parse dates and numbers. We assume values are sorted by date.
   // Also compute the maximum delayValue per delay, needed for the y-domain.
-  symbols.forEach(function(s) {
+  airDelay.forEach(function(s) {
     s.values.forEach(function(d) { d.date = parse(d.date); d.delayValue = +d.delayValue; });
-    s.maxPrice = d3.max(s.values, function(d) { return d.delayValue; });
+    s.maxDelay = d3.max(s.values, function(d) { return d.delayValue; });
     s.sumPrice = d3.sum(s.values, function(d) { return d.delayValue; });
   });
 
   // Sort by maximum delayValue, descending.
-  symbols.sort(function(a, b) { return b.maxPrice - a.maxPrice; });
-  var dates = symbols[0].values.map(function(d) {return d.date});
+  airDelay.sort(function(a, b) { return b.maxDelay - a.maxDelay; });
+  var dates = airDelay[0].values.map(function(d) {return d.date});
   
   years = dates.map(function(d) {return d.getFullYear() + "/" + (+d.getMonth() + 1)})
   .filter(function(d, i){return i == 0 || (i + 1) % 6 == 0});
  
  
   var g = svg.selectAll("g")
-      .data(symbols)
+      .data(airDelay)
     .enter().append("g")
       .attr("class", "delay");
 
-      alert("cambiare grafico con un click del mouse, ma attendere il completamento dell' animazione prima di ricliccare, altrimenti ricaricare la pagina.");
+   alert("cambiare grafico con un click del mouse, ma attendere il completamento dell' animazione prima di ricliccare, altrimenti ricaricare la pagina.");
 
   setTimeout( lines, duration);//parto a disegnare
 });
@@ -180,6 +180,7 @@ contatore +=1;
 }
 };
 
+//-----------------------------------------------------------------------------------------------------------------------------------------
 
 svg.append("text").attr("id","title").attr("text-anchor","middle").style("font-size","38").attr("transform","translate("+((w/2))+",-20)");
 
@@ -193,7 +194,7 @@ function lines() {
 d3.select("#riquadro").attr("opacity",0.1);
 titolo(contatore);
 
-  var maxRitardo = symbols[0].maxPrice;
+  var maxRitardo = airDelay[0].maxDelay;
 
 
   var xRange = d3.scale.ordinal().domain(years).rangePoints([0, w - 60]);
@@ -208,10 +209,10 @@ titolo(contatore);
   var x_axis = d3.svg.axis().scale(xRange);
   svg.append("g").attr("id", "x_axis").attr("transform", "translate(0," + h + ")").call(x_axis);
 
-  // Compute the minimum and maximum date across symbols.
+  // Compute the minimum and maximum date across airDelay.
   x.domain([
-    d3.min(symbols, function(d) { return d.values[0].date; }),
-    d3.max(symbols, function(d) { return d.values[d.values.length - 1].date; })
+    d3.min(airDelay, function(d) { return d.values[0].date; }),
+    d3.max(airDelay, function(d) { return d.values[d.values.length - 1].date; })
   ]);
 
   var g = svg.selectAll(".delay")
@@ -239,7 +240,7 @@ titolo(contatore);
   function draw(k) {
     g.each(function(d) {
       var e = d3.select(this);
-      y.domain([0, d.maxPrice]);
+      y.domain([0, d.maxDelay]);
 
       e.select("path")
           .attr("d", function(d) { return line(d.values.slice(0, k + 1)); });
@@ -250,7 +251,7 @@ titolo(contatore);
     });
   }
 
-  var k = 1, n = symbols[0].values.length;
+  var k = 1, n = airDelay[0].values.length;
   d3.timer(function() {
     draw(k);
     if ((k += 2) >= n - 1) {
@@ -296,7 +297,7 @@ function horizons() {
       .attr("dy", "0em");
 
   g.each(function(d) {
-    y.domain([0, d.maxPrice]);
+    y.domain([0, d.maxDelay]);
 
     d3.select(this).selectAll(".area")
         .data(d3.range(3))
@@ -307,7 +308,7 @@ function horizons() {
         .style("fill", function(d, i) { return color(i); })
         .style("fill-opacity", 0);
 
-    y.domain([0, d.maxPrice / 3]);
+    y.domain([0, d.maxDelay / 3]);
 
     d3.select(this).selectAll(".line").transition()
         .duration(duration)
@@ -345,7 +346,7 @@ function areas() {
       .attr("d", function(d) { return axis(d.values); });
 
   g.each(function(d) {
-    y.domain([0, d.maxPrice]);
+    y.domain([0, d.maxDelay]);
 
     d3.select(this).select(".line").transition()
         .duration(duration)
@@ -381,8 +382,8 @@ function areas() {
 
 function stackedArea() {
 
-
-  yRange2 = d3.scale.linear().domain([0, d3.max(sum_months(symbols))]).range([h , 0]);
+//differente asse y per somma delle medie dei ritardi per ogni mese
+  yRange2 = d3.scale.linear().domain([0, d3.max(sum_months(airDelay))]).range([h , 0]);
   y_axis2 = d3.svg.axis().scale(yRange2).orient("left").tickFormat(function(d){return d3.format(".1f")(d/1)}).ticks(15);
   svg.append("g").attr("id", "y_axis2").attr("opacity",1).call(y_axis2);
   
@@ -402,10 +403,10 @@ function stackedArea() {
       .out(function(d, y0, y) { d.delay0 = y0; })
       .order("reverse");
 
-  stack(symbols);
+  stack(airDelay);
 
   y
-      .domain([0, d3.max(symbols[0].values.map(function(d) { return d.delayValue + d.delay0; }))])
+      .domain([0, d3.max(airDelay[0].values.map(function(d) { return d.delayValue + d.delay0; }))])
       .range([h, 0]);
 
   line
@@ -427,7 +428,7 @@ function stackedArea() {
       .style("stroke-opacity", 1)
       .attr("d", function(d) { return line(d.values); });
 
-  var labelHeights = symbols
+  var labelHeights = airDelay
       .map(function(d){return d.values[d.values.length - 1];})
       .map(function(d){return y(d.delayValue / 2 + d.delay0);});
 
@@ -454,7 +455,7 @@ function streamgraph() {
       .order("reverse")
       .offset("wiggle");
 
-  stack(symbols);
+  stack(airDelay);
 
   line
       .y(function(d) { return y(d.delay0); });
@@ -469,7 +470,7 @@ function streamgraph() {
       .style("stroke-opacity", 0)
       .attr("d", function(d) { return line(d.values); });
 
-    var labelHeights = symbols
+    var labelHeights = airDelay
         .map(function(d){return d.values[d.values.length - 1];})
         .map(function(d){return y(d.delayValue / 2 + d.delay0);});
 
@@ -498,7 +499,7 @@ function overlappingArea() {
       .attr("d", function(d) { return line(d.values); });
 
   y
-      .domain([0, d3.max(symbols.map(function(d) { return d.maxPrice; }))])
+      .domain([0, d3.max(airDelay.map(function(d) { return d.maxDelay; }))])
       .range([h, 0]);
 
   area
@@ -544,11 +545,11 @@ function groupedBar() {
 
   titolo(contatore);
   x = d3.scale.ordinal()
-      .domain(symbols[0].values.map(function(d) { return d.date; }))
+      .domain(airDelay[0].values.map(function(d) { return d.date; }))
       .rangeBands([0, w - 60], .1);
 
   var x1 = d3.scale.ordinal()
-      .domain(symbols.map(function(d) { return d.key; }))
+      .domain(airDelay.map(function(d) { return d.key; }))
       .rangeBands([0, x.rangeBand()]);
 
   var g = svg.selectAll(".delay");
@@ -599,23 +600,23 @@ function stackedBar() {
 
   var g = svg.selectAll(".delay");
 
-  stack(symbols);
+  stack(airDelay);
 
   y
-      .domain([0, d3.max(symbols[0].values.map(function(d) { return d.delayValue + d.delay0; }))])
+      .domain([0, d3.max(airDelay[0].values.map(function(d) { return d.delayValue + d.delay0; }))])
       .range([h, 0]);
 
   var t = g.transition()
       .duration(duration / 2);
 
-    var labelHeights = symbols
+    var labelHeights = airDelay
         .map(function(d){return d.values[d.values.length - 1];})
         .map(function(d){return y(d.delayValue / 2 + d.delay0);});
 
     distantiate(labelHeights);
 
   t.select("text")
-      .delay(symbols[0].values.length * 10)
+      .delay(airDelay[0].values.length * 10)
       //.attr("transform", function(d) { d = d.values[d.values.length - 1]; return "translate(" + (w - 60) + "," + y(d.delayValue / 2 + d.delay0) + ")"; });
       .attr("transform", function(d, i) { return "translate(" + (w - 60) + "," + labelHeights[i] + ")"; });
 
@@ -643,7 +644,7 @@ function transposeBar() {
   d3.select("#y_axis2").remove();
   titolo(contatore);
   
-  yRange1 = d3.scale.linear().domain([0, d3.max(symbols.map(function(d) { return d3.sum(d.values.map(function(d) { return d.delayValue; })); }))]).range([h , 0]);
+  yRange1 = d3.scale.linear().domain([0, d3.max(airDelay.map(function(d) { return d3.sum(d.values.map(function(d) { return d.delayValue; })); }))]).range([h , 0]);
   y_axis1 = d3.svg.axis().scale(yRange1).orient("left").tickFormat(function(d){return d3.format(".1f")(d/1)}).ticks(11);
   svg.append("g").attr("id", "y_axis1").attr("opacity",1).call(y_axis1);
   
@@ -652,18 +653,18 @@ function transposeBar() {
   
   d3.select("#x_axis").attr("opacity",0);
   x
-      .domain(symbols.map(function(d) { return d.key; }))
+      .domain(airDelay.map(function(d) { return d.key; }))
       .rangeRoundBands([0, w-50], .2);
 
   y
-      .domain([0, d3.max(symbols.map(function(d) { return d3.sum(d.values.map(function(d) { return d.delayValue; })); }))]);
+      .domain([0, d3.max(airDelay.map(function(d) { return d3.sum(d.values.map(function(d) { return d.delayValue; })); }))]);
 
   var stack = d3.layout.stack()
       .x(function(d, i) { return i; })
       .y(function(d) { return d.delayValue; })
       .out(function(d, y0, y) { d.delay0 = y0; });
 
-  stack(d3.zip.apply(null, symbols.map(function(d) { return d.values; }))); // transpose!
+  stack(d3.zip.apply(null, airDelay.map(function(d) { return d.values; }))); // transpose!
 
   var g = svg.selectAll(".delay");
 
@@ -710,7 +711,7 @@ function donut() {
 
   g.append("path")
       .style("fill", function(d) { return color(d.key); })
-      .data(function() { return pie(symbols); })
+      .data(function() { return pie(airDelay); })
     .transition()
       .duration(duration+1000)
       .tween("arc", arcTween);
@@ -795,7 +796,7 @@ function donutExplode() {
     svg.selectAll("*").remove();
     svg_1.selectAll("*").remove();
     contatore =0;
-    svg.selectAll("g").data(symbols).enter().append("g").attr("class", "delay");
+    svg.selectAll("g").data(airDelay).enter().append("g").attr("class", "delay");
     svg.append("text").attr("id","title").attr("text-anchor","middle").style("font-size","38").attr("transform","translate("+((w/2))+",-20)");
     
     svg_1.append("rect").attr("class","shape").attr("id","riquadro").attr("height",200).attr("width",900).attr("y",-80).attr("x",0).attr("opacity",0.0);
