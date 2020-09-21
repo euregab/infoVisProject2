@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style type="text/css">
+
+svg {
+  font-family: "Helvetica Neue", Helvetica;
+}
+
+.line {
+  fill: none;
+  stroke: #000;
+  stroke-width: 2px;
+}
+
+</style>
+<body>
+
+    <button onclick="location.href = './progetto_vis.html';" id="myButton" class="float-left submit-button" style="position: relative;">Start</button>
+
+
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script src="//d3plus.org/js/d3plus.js"></script>
+
+<script>
+
+var bottone =document.getElementById("myButton");
+bottone.setAttribute("x","300");
+
+
+
+var m = [80, 80, 100, 80],
+    w = 1160 - m[1] - m[3],
+    h = 800 - m[0] - m[2];
+
+
+var svg = d3.select("body").append("svg")
+.attr("id","svg")
+    .attr("width", w + m[1] + m[3])
+    .attr("height", h + m[0] + m[2])
+  .append("g")
+    .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
+
+
+svg.append("text").text(" Ultimo progetto Visualizzazione delle Informazioni").attr("id","title").attr("text-anchor","middle").style("font-size","38").attr("x",""+1140/2+"");
+
+svg.append("g").append("text").text(" Gruppo : Alessio Sigona- Gabriele D'Angelo ").attr("id","title").attr("text-anchor","middle").style("font-size","30").attr("x",""+1140/2+"").attr("y",""+60+"");
+
+
+svg.append("rect").attr("class","shape").attr("id","riquadro").attr("height",500).attr("width",850).attr("y",200).attr("x",150).attr("opacity",0.01);
+svg.append("text").attr("id","rectWrap").attr("class","wrap").attr("y",200).attr("x",150).style("font-size","26");
+
+
+
+
+
+d3.selectAll("#rectWrap").text("In questo progetto abbiamo deciso di visualizzare in più grafici, l'andamento delle medie dei ritardi dei voli aerei americani, dal 2015 al 2019. Il dataset utilizzato è il prodotto di operazioni svolte con un RDBMS (lo stesso dataset è stato utilizzato e manipolato per il corso di BigData) ed è costituito da 3 colonne: _ tipo di ritardo; _ anno e mese; _ valore del ritardo in minuti.");
+d3plus.textwrap()
+    .container(d3.select("#rectWrap"))
+    .draw();
+
+
+
+
+
+
+
+
+    </script>
