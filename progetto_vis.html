@@ -381,6 +381,13 @@ function areas() {
 
 function stackedArea() {
 
+
+  yRange2 = d3.scale.linear().domain([0, d3.max(sum_months(symbols))]).range([h , 0]);
+  y_axis2 = d3.svg.axis().scale(yRange2).orient("left").tickFormat(function(d){return d3.format(".1f")(d/1)}).ticks(15);
+  svg.append("g").attr("id", "y_axis2").attr("opacity",1).call(y_axis2);
+  
+
+
   titolo(contatore);
   duration =100
   delay = 500
@@ -436,6 +443,8 @@ function stackedArea() {
 }
 
 function streamgraph() {
+
+  d3.select("#y_axis2").attr("opacity",0);
   titolo(contatore);
   var stack = d3.layout.stack()
       .values(function(d) { return d.values; })
@@ -574,9 +583,10 @@ function groupedBar() {
 }
 
 function stackedBar() {
-
+  
+  d3.select("#y_axis2").attr("opacity",1);
   titolo(contatore);
- 
+  
   d3.select("#y_axis").remove();
   x.rangeRoundBands([0, w - 60], 0);
 
@@ -629,7 +639,8 @@ function stackedBar() {
 }
 
 function transposeBar() {
-
+ 
+  d3.select("#y_axis2").remove();
   titolo(contatore);
   
   yRange1 = d3.scale.linear().domain([0, d3.max(symbols.map(function(d) { return d3.sum(d.values.map(function(d) { return d.delayValue; })); }))]).range([h , 0]);
