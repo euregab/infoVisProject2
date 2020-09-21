@@ -142,6 +142,25 @@ function distantiate(array){
 
 }
 
+function sum_months(array){
+    let i, j;
+    let len = array.length;
+    let months = [];
+    let values_len = array[0].values.length;
+    for (j = 0; j < values_len; j++){
+            months[j] = 0;
+    }
+    for (i = 0; i < len; i++){
+        let values_len = array[i].values.length;
+        console.log(array[i].values)
+        for (j = 0; j < values_len; j++){
+            console.log(array[i].values[j].delayValue)
+            months[j] += array[i].values[j].delayValue;
+        }
+    }
+    return months;
+}
+
 var contatore = 0;
 
 
